@@ -64,3 +64,20 @@ long ztime_length_us(const ztime_t & begin, const ztime_t & end)
 } // namespace time
 } // namespace low
 } // namespace z
+
+#if Z_COMPILE_FLAG_ENABLE_UT 
+#include <gtest/gtest.h>
+TEST(ut_zlow_ztime, time_string) {
+    char buf[z::low::time::ZTIME_STRING_MIN_BUFSIZE];
+    for (uint32_t i = 0; i < 32; ++i) {
+        z::low::time::now_local(buf, sizeof(buf) );
+        EXPECT_EQ(24, strlen(buf) ) << buf << std::endl;
+    }
+
+    for (uint32_t i = 0; i < 32; ++i) {
+        z::low::time::now_utc(buf, sizeof(buf) );
+        EXPECT_EQ(24, strlen(buf) ) << buf << std::endl;
+    }
+}
+#endif // Z_COMPILE_FLAG_ENABLE_UT
+

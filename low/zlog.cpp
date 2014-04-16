@@ -61,3 +61,17 @@ int zlog(zlog_level_t log_level, const char * file, uint32_t line, const char * 
 } // namespace low
 } // namespace z
 
+#if Z_COMPILE_FLAG_ENABLE_UT 
+#include <gtest/gtest.h>
+TEST(ut_zlow_zlog, print_log) {
+    for (uint32_t i = 0; i < 32; ++i) {
+        EXPECT_EQ(0, ZLOG(LOG_MSG,   "mylog [#%u] [%s]", i, "content") );
+        EXPECT_EQ(0, ZLOG(LOG_FATAL, "mylog [#%u] [%s]", i, "content") );
+        EXPECT_EQ(0, ZLOG(LOG_ERROR, "mylog [#%u] [%s]", i, "content") );
+        EXPECT_EQ(0, ZLOG(LOG_WARN,  "mylog [#%u] [%s]", i, "content") );
+        EXPECT_EQ(0, ZLOG(LOG_INFO,  "mylog [#%u] [%s]", i, "content") );
+        EXPECT_EQ(0, ZLOG(LOG_DEBUG, "mylog [#%u] [%s]", i, "content") );
+    }
+}
+#endif // Z_COMPILE_FLAG_ENABLE_UT
+

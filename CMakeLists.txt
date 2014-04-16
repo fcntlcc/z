@@ -1,9 +1,12 @@
 cmake_minimum_required(VERSION 2.8)
 project(zframe)
 
-include_directories(${CMAKE_SOURCE_DIR})
+include_directories(${CMAKE_SOURCE_DIR}
+                    ${CMAKE_SOURCE_DIR}/3rd/include)
 set(Z_FLAG_ENABLE_UT "-DZ_COMPILE_FLAG_ENABLE_UT=1")
 add_definitions("-Wall -Wextra -Werror")
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall -std=c++11")
 
 #3rd party libraries
 find_package(GTest REQUIRED)
@@ -29,6 +32,13 @@ add_library(rpc     ${rpc_cpp})
 add_library(rpc-ut  ${rpc_cpp})
 set_target_properties(rpc-ut    PROPERTIES COMPILE_FLAGS ${Z_FLAG_ENABLE_UT})
 
+#LIB beta - the BETA version libraries
+file(GLOB_RECURSE beta_h    FOLLOW_SYMLINKS beta/*.h)
+file(GLOB_RECURSE beta_cpp  FOLLOW_SYMLINKS beta/*.cpp)
+add_library(beta    ${beta_cpp})
+add_library(beta-ut ${beta_cpp})
+set_target_properties(beta-ut   PROPERTIES COMPILE_FLAGS ${Z_FLAG_ENABLE_UT})
+
 # TEST: unit test 
 file(GLOB_RECURSE ut_h      FOLLOW_SYMLINKS ut/*.h)
 file(GLOB_RECURSE ut_cpp    FOLLOW_SYMLINKS ut/*.cpp)
@@ -39,6 +49,7 @@ target_link_libraries(ut
                      foo-ut
                      low-ut
                      rpc-ut
+                     beta-ut
                      -Wl,--no-whole-archive
                      gtest)
 

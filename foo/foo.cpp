@@ -1,5 +1,4 @@
 #include "./foo.h"
-#include <env/ut.h>
 
 static const char * foo_impl();
 
@@ -15,13 +14,13 @@ const char * foo_impl()
     return "foo";
 }
 
-Z_UNIT_TEST (
-;
 
+#if Z_COMPILE_FLAG_ENABLE_UT
+#include <gtest/gtest.h>
 // test foo_impl()
 TEST(ut_foo_impl, return_string_check) {
     ASSERT_STREQ("foo", foo_impl() );
 }
 
-); // Z_UNIT_TEST
+#endif // Z_COMPILE_FLAG_ENABLE_UT
 

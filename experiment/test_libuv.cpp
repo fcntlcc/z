@@ -12,9 +12,9 @@
 
 static int hello();
 static int idle_event();
-static void idle_callback(uv_idle_t *handle, int status);
+static void idle_callback(uv_idle_t *handle);
 static int time_event();
-static void time_callback(uv_timer_t * handle, int status);
+static void time_callback(uv_timer_t * handle);
 
 int main(int argc, char *argv[])
 {
@@ -48,11 +48,11 @@ static int idle_event()
     return 0;
 }
 
-static void idle_callback(uv_idle_t * handle, int status)
+static void idle_callback(uv_idle_t * handle)
 {
     static int cnt = 0;
     ++cnt;
-    ZLOG(LOG_DEBUG, "IDLE [%p][%d] status[%d]", handle, cnt, status);
+    ZLOG(LOG_DEBUG, "IDLE [%p][%d]", handle, cnt);
     if (cnt >= 10) {
         uv_idle_stop(handle);
     }
@@ -69,11 +69,11 @@ static int time_event()
     return 0;
 }
 
-static void time_callback(uv_timer_t * handle, int status)
+static void time_callback(uv_timer_t * handle)
 {
     static int cnt = 0;
     ++cnt;
-    ZLOG(LOG_DEBUG, "IDLE [%p][%d] status[%d]", handle, cnt, status);
+    ZLOG(LOG_DEBUG, "IDLE [%p][%d]", handle, cnt);
     if (cnt >= 10) {
         uv_timer_stop(handle);
     }

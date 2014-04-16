@@ -10,3 +10,7 @@ target_link_libraries(test_libuv uv low)
 add_executable(test_disk_io test_disk_io.cpp)
 target_link_libraries(test_disk_io low)
 
+# TEST: rapidjson
+add_executable(test_rapidjson test_rapidjson.cpp)
+target_link_libraries(test_rapidjson low beta)
+
