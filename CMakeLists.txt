@@ -51,10 +51,15 @@ target_link_libraries(ut
                      rpc-ut
                      beta-ut
                      -Wl,--no-whole-archive
-                     gtest)
+                     gtest
+                     pthread
+                     rt)
 
 enable_testing()
 add_test(ut_all ut)
+
+# DIR: demo
+add_subdirectory(demo)
 
 # DIR: tool
 add_subdirectory(tool)

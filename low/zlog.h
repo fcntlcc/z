@@ -2,6 +2,7 @@
 #define Z_ZLOW_ZLOG_H__
 
 #include <stdint.h>
+#include <string>
 
 namespace z {
 namespace low {
@@ -23,6 +24,8 @@ enum zlog_level_t {
 
 int zlog(zlog_level_t log_level, const char * file, uint32_t line, const char * pattern, ...);
 
+std::string zstrerror(int err);
+
 } // namespace log
 } // namespace low
 } // namespace z
@@ -33,7 +36,10 @@ using z::low::log::LOG_ERROR;
 using z::low::log::LOG_WARN;
 using z::low::log::LOG_INFO;
 using z::low::log::LOG_DEBUG;
+
 #define ZLOG(level, msg, ...) ::z::low::log::zlog(level, __BASE_FILE__, __LINE__, msg, ##__VA_ARGS__)
+
+#define ZSTRERR(x) ::z::low::log::zstrerror(x)
 
 #endif
 

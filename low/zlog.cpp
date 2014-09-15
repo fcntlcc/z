@@ -57,6 +57,13 @@ int zlog(zlog_level_t log_level, const char * file, uint32_t line, const char * 
     return 0;
 }
 
+
+std::string zstrerror(int err) {
+    char buf[256];
+    return strerror_r(err, buf, sizeof(buf) );
+}
+
+
 } // namespace log
 } // namespace low
 } // namespace z
