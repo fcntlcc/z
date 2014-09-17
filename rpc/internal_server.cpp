@@ -46,7 +46,11 @@ void InternalEchoServer::processTask(TaskBase *task) {
 
     void *req = nullptr;
     uint32_t req_len = 0;
-    
+/*    
+    task->req_buf->block_ref(&req, &req_len);
+    ZLOG(LOG_INFO, "REQ[size: %u] [HEAD 8][%lx]", 
+        task->req_buf->data_size(), *((uint64_t*)(req)));
+*/
     for (;;) {
         task->req_buf->block_read(&req, &req_len);
         if (req_len == 0) {
@@ -55,6 +59,11 @@ void InternalEchoServer::processTask(TaskBase *task) {
 
         task->res_buf->write(req, req_len);
     }
+/*
+    task->res_buf->block_ref(&req, &req_len);
+    ZLOG(LOG_INFO, "RES[size: %u] [HEAD 8][%lx]", 
+        task->res_buf->data_size(), *((uint64_t*)(req)));
+*/
 }
 
 

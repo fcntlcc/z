@@ -141,6 +141,13 @@ bool ZThreadPool::start(uint32_t thread_num) {
 void ZThreadPool::stop() {
     Z_RET_IF(_status != ThreadPoolStatus::RUNNING, );
     _status = ThreadPoolStatus::STOP;
+
+    int n = 0;
+    while (n < 10000 && !_task_queue.isEmpty() ) {
+        usleep(1000 * 3);
+        ++n;
+    }
+
     for (ThreadInfoList::iterator i = _threads.begin(); i != _threads.end(); ++i) {
         if (i->is_running) {
             pthread_join(i->id, nullptr);
@@ -159,6 +166,8 @@ bool ZThreadPool::commit(ZThreadTask *task) {
         task->next_status();
         return true;
     } else {
+        ZLOG(LOG_WARN, "Enqueue failed: count: %u, is_full: %d",
+            _task_queue.count(), int(_task_queue.isFull() ) );
         return false;
     }
 }
@@ -182,15 +191,15 @@ void *ZThreadPool::ThreadMain(void *a) {
         epoll_event ev;
         int ret = epoll_wait(this_ptr->_sched_epoll, &ev, 1, 100);
         if (ret < 0) {
-            ZLOG(LOG_WARN, "epoll wait error. %d:%d(%s) event:0x%lx", 
+            ZLOG(LOG_WARN, "epoll wait error, will retry in 10ms. %d:%d(%s) event:0x%lx", 
                 ret, errno, ZSTRERR(errno).c_str(), uint64_t(ev.events) );
-            usleep(1000 * 1000);
+            usleep(1000 * 10);
             continue;
         } else if (ret == 0) {
             continue;
         } 
 
-        if (ev.events | EPOLLIN) {
+        if (ev.events & EPOLLIN) {
             ZThreadTask *task = nullptr;
             this_ptr->_task_queue.dequeue(&task);
             ZASSERT(0 == epoll_ctl(this_ptr->_sched_epoll, EPOLL_CTL_MOD, 

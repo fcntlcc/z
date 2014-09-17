@@ -61,6 +61,8 @@ public:
 
     uint32_t data_size() const;
 
+    int32_t skip(uint32_t bytes);
+
     int32_t write(void *buf, uint32_t bytes);
     int32_t read(void *buf, uint32_t bytes, bool inc_pos = true);
 
@@ -72,6 +74,7 @@ private:
 private:
     Mempool         *_mempool;
     uint32_t        _block_size;
+    uint32_t        _block_data_size;
     uint32_t        _data_size;
     BufferOffset    _r_pos;
     BufferOffset    _w_pos;

@@ -41,5 +41,7 @@ using z::low::log::LOG_DEBUG;
 
 #define ZSTRERR(x) ::z::low::log::zstrerror(x)
 
+#define ZLOGPOS ZLOG(LOG_INFO, "~")
+
 #endif
 

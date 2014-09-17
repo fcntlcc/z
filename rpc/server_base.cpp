@@ -16,8 +16,8 @@ void ServerBase::prepareTask(TaskBase *task) {
     void *mem_res = task->mempool->malloc(sizeof(z::low::mem::RWBuffer) );
     Z_RET_IF_ANY_ZERO_2(mem_req, mem_res,);
 
-    task->req_buf = new (mem_req) z::low::mem::RWBuffer(task->mempool, 1024 * 4u);
-    task->res_buf = new (mem_res) z::low::mem::RWBuffer(task->mempool, 1024 * 4u);
+    task->req_buf = new (mem_req) z::low::mem::RWBuffer(task->mempool, 1024 * 16u);
+    task->res_buf = new (mem_res) z::low::mem::RWBuffer(task->mempool, 1024 * 16u);
 }
 
 void ServerBase::resetTask(TaskBase *task) {

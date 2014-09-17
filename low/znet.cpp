@@ -1,4 +1,5 @@
 #include "./znet.h"
+#include "./zlog.h"
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
@@ -44,14 +45,16 @@ socket_fd_t tcp_create_socket_to(const char *node, const char *service, bool asy
 
     memset(&hint, 0, sizeof(hint) );
     hint.ai_family      = AF_INET;
-    hint.ai_socktype    = SOCK_STREAM | SOCK_CLOEXEC | ((async) ? SOCK_NONBLOCK : 0);
+    hint.ai_socktype    = SOCK_STREAM;
 
     int r = ::getaddrinfo(node, service, &hint, &res);
     if (0 != r) {
         return NullSocket;
     }
 
-    socket_fd_t s = ::socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+    socket_fd_t s = ::socket(res->ai_family, 
+                (res->ai_socktype | SOCK_CLOEXEC | ((async) ? SOCK_NONBLOCK : 0)), 
+                res->ai_protocol);
 
     r = ::connect(s, res->ai_addr, res->ai_addrlen);
     if (r == -1 && !(errno = EINPROGRESS || errno == EINTR) ) {
@@ -77,7 +80,7 @@ socket_fd_t tcp_listen(const char *service, int backlog, bool async) {
 
     memset(&hint, 0, sizeof(hint) );
     hint.ai_family      = AF_INET;
-    hint.ai_socktype    = SOCK_STREAM | SOCK_CLOEXEC;
+    hint.ai_socktype    = SOCK_STREAM;
     hint.ai_flags       = AI_PASSIVE;
 
     int r = ::getaddrinfo(nullptr, service, &hint, &res);
@@ -85,7 +88,7 @@ socket_fd_t tcp_listen(const char *service, int backlog, bool async) {
         return NullSocket;
     }
 
-    socket_fd_t s = ::socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+    socket_fd_t s = ::socket(res->ai_family, res->ai_socktype | SOCK_CLOEXEC, res->ai_protocol);
     r = bind(s, res->ai_addr, res->ai_addrlen);
     if (r == -1) {
         ::close(s);

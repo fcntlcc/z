@@ -65,6 +65,7 @@ private:
 // ------------------------------------------------------------------------ //
 
 class ZThreadTask {
+    Z_DECLARE_COPY_FUNCTIONS(ZThreadTask)
 public:
     enum TaskStatus {
         INIT        = 0,
