@@ -13,8 +13,8 @@ int main(int argc, char* /*argv*/[])
 {
     fprintf(stdout, "zclient started. [argc: %d]\n", argc);
 
-    const char * host = "www.baidu.com";
-    const char * port = "80";
+    const char * host = "127.0.0.1";
+    const char * port = "";
 
     addrinfo * addr = NULL;
     int err = getaddrinfo(host, port, NULL, &addr);
@@ -52,8 +52,8 @@ int main(int argc, char* /*argv*/[])
     fprintf(stderr, "connect succ.\n");
 
     const char * get_msg = 
-        "GET / HTTP/1.1\r\n"
-        "Host: www.baidu.com\r\n\r\n";
+        "GET /cluster=ys&&query=WIFI HTTP/1.1\r\n"
+        "Host: 127.0.0.1\r\n\r\n";
     write(sock, get_msg, strlen(get_msg) );
     
     fcntl(sock, F_SETFD, O_NONBLOCK | fcntl(sock, F_GETFD) );
@@ -79,13 +79,13 @@ int main(int argc, char* /*argv*/[])
                     char buf[2048];
                     int ret = read(sock, buf, sizeof(buf) - 1);
                     if (-1 == ret || 0 == ret) {
-                        fprintf(stdout, "EXIT [ret = %d]\n", ret);
+                        fprintf(stderr, "EXIT [ret = %d]\n", ret);
                         goto exit;
                     }
                     buf[ret] = 0;
-                    fprintf(stdout, "RD: [%2.d] [%s]\n", ret, buf);
+                    fprintf(stderr, "RD: [%2.d] [%s]\n", ret, buf);
                 } else {
-                    fprintf(stdout, "ERR\n");
+                    fprintf(stderr, "ERR\n");
                     goto exit;
                 }
             }

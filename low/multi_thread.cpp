@@ -207,8 +207,9 @@ void *ZThreadPool::ThreadMain(void *a) {
             if (task) {
                 task->next_status();
                 task->exec(nullptr);
-                task->next_status();
-                task->signal_done();
+                if (ZThreadTask::DONE != task->status() ) {
+                    task->signal_done();
+                }
             } else {
                 ZLOG(LOG_WARN, "NO TASK: count:%lu", this_ptr->_task_queue.count() );
             }

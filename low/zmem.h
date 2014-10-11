@@ -63,7 +63,7 @@ public:
 
     int32_t skip(uint32_t bytes);
 
-    int32_t write(void *buf, uint32_t bytes);
+    int32_t write(const void *buf, uint32_t bytes);
     int32_t read(void *buf, uint32_t bytes, bool inc_pos = true);
 
     void block_read(void **buf, uint32_t *bytes);

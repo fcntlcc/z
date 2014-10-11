@@ -6,6 +6,8 @@
 
 #ifndef Z_DISABLE_MACROS
 
+#define Z_USE_VAR(v) do {} while (false && v)
+
 #define Z_DECLARE_COPY_FUNCTIONS(class_name)        \
     class_name(const class_name&);                  \
     const class_name& operator=(const class_name&);
@@ -63,8 +65,11 @@
 #define Z_FIND_OBJ_BY_MEMBER(obj_type, member, member_ptr)      \
     ((obj_type*)(((char*)(member_ptr)) - (unsigned long long)(&((obj_type*)(0))->member) ) )
 
+#ifndef NDEBUG
 #define ZASSERT(X) assert(X)
-
+#else
+#define ZASSERT(X) do {if (!(X)) {ZLOG(LOG_FATAL, "ASSERTION FAILED!  But it is ignored in this release version now.");} } while (0)
+#endif
 
 
 #endif // Z_DISABLE_MACROS

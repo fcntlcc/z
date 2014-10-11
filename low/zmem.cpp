@@ -165,9 +165,9 @@ int32_t RWBuffer::skip(uint32_t bytes) {
 
     return read_cnt;
 } 
-int32_t RWBuffer::write(void *buf, uint32_t bytes) {
+int32_t RWBuffer::write(const void *buf, uint32_t bytes) {
     int32_t write_cnt = 0;
-    char *   pwrite = (char*)(buf);
+    const char *pwrite = (const char*)(buf);
     while (buf && (bytes > 0) ) {
         if (_w_pos.offset >= _block_data_size) {
             _w_pos.block->next = make_new_block();

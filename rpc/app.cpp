@@ -16,6 +16,7 @@ int ZEPollTCPDaemon::ThreadTask::exec(void *) {
     Z_RET_IF_ANY_ZERO_3(_unit.server, _unit.task, _result_queue, -1);
 
     _unit.server->processTask(_unit.task);
+    this->signal_done();
 
     ZASSERT(_result_queue->enqueue(_unit_id) );
 
@@ -172,6 +173,13 @@ void ZEPollTCPDaemon::do_client_socket_event(const epoll_event &e) {
 
 void ZEPollTCPDaemon::start_serve_client(int client_fd) {
     uint32_t id = _unit_pool.allocate();
+    if (id >= _server_data.server_task_pair_num) {
+        ZLOG(LOG_WARN, "Too many clients. Only %lu allowed. [id: %u]",
+            _server_data.server_task_pair_num, id);
+        ::close(client_fd);
+        return ;
+    }
+
     ProcUnit unit = id_to_unit(id);
     ZASSERT(unit.server && unit.task);
     
@@ -298,7 +306,10 @@ void ZEPollTCPDaemon::start_process_task(uint32_t unit_id) {
     unit.thread_task->reset();
     unit.thread_task->reset_info(unit_id, unit, &_results);
 
-    ZASSERT(_thread_pool.commit(unit.thread_task) );
+    while (!_thread_pool.commit(unit.thread_task) ) {
+        ZLOG(LOG_WARN, "Can not enqueue to the task queue. Too many requests. Delay this request for 1 ms.");
+        usleep(1000);
+    }
 }
 
 ZEPollTCPDaemon::ProcUnit ZEPollTCPDaemon::id_to_unit(uint32_t unit_id) {
