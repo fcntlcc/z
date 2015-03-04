@@ -52,6 +52,7 @@ target_link_libraries(ut
                      beta-ut
                      -Wl,--no-whole-archive
                      gtest
+                     crypto
                      pthread
                      rt)
 

@@ -7,3 +7,6 @@ target_link_libraries(demo_rand_client low pthread rt)
 add_executable(demo_internal_echo_server internal_echo_server.cpp)
 target_link_libraries(demo_internal_echo_server rpc low pthread rt)
 
+add_executable(demo_http_server http_server.cpp)
+target_link_libraries(demo_http_server rpc low pthread rt)
+

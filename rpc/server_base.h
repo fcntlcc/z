@@ -10,6 +10,8 @@ namespace rpc {
 
 struct TaskBase {
     z::low::net::socket_fd_t        socket;
+    uint32_t                        flag_keepalive:1;
+    uint32_t                        flag_reserved:31;
     z::low::mem::CacheAppendMempool *mempool;
     z::low::mem::RWBuffer           *req_buf;
     z::low::mem::RWBuffer           *res_buf;

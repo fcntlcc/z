@@ -18,6 +18,9 @@ void ServerBase::prepareTask(TaskBase *task) {
 
     task->req_buf = new (mem_req) z::low::mem::RWBuffer(task->mempool, 1024 * 16u);
     task->res_buf = new (mem_res) z::low::mem::RWBuffer(task->mempool, 1024 * 16u);
+
+    task->flag_keepalive = 1;
+    task->flag_reserved  = 0;
 }
 
 void ServerBase::resetTask(TaskBase *task) {

@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include "./macro_utils.h"
 
 namespace z {
 namespace low {
@@ -80,6 +81,39 @@ private:
     BufferOffset    _w_pos;
     uint32_t        _own_mempool:1;
 };
+
+class BytesQueue {
+private:
+    Z_DECLARE_COPY_FUNCTIONS(BytesQueue);
+public:
+    BytesQueue(uint32_t bytes = 1024u * 64);
+    BytesQueue(void *buf, uint32_t bytes);
+    ~BytesQueue();
+
+    void *      in_pos();
+    uint32_t    in_size() const;
+    bool        commit(uint32_t nbytes);
+
+    void *      out_pos();
+    uint32_t    out_size() const;
+    bool        consume(uint32_t nbytes);
+
+    bool        optimize(uint32_t expected_bytes = 0);
+private:
+    void        init_qbuffer(void *buf, uint32_t bytes);
+    void        reset_qbuffer();
+    struct QBuffer {
+        char*       buf;
+        uint32_t    size;
+        uint32_t    in_offset;
+        uint32_t    out_offset;
+        uint32_t    is_self_allocated:1;
+        uint32_t    reserved:31;
+    };
+
+    QBuffer         _d;
+};
+
 
 
 }

@@ -19,7 +19,8 @@ enum zlog_level_t {
     LOG_INFO,
     LOG_DEBUG,
 
-    LOG_LEVEL_END
+    LOG_LEVEL_END,
+    LOG_LEVEL_LIMIT = LOG_LEVEL_END
 };
 
 int zlog(zlog_level_t log_level, const char * file, uint32_t line, const char * pattern, ...);

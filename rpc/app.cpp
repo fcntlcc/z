@@ -268,8 +268,12 @@ void ZEPollTCPDaemon::do_send_result(uint32_t unit_id) {
     if (bytes == 0) {
         ZASSERT(pbuf->data_size() == 0);
         // sending result done.
-        unit.server->resetTask(unit.task);
-        start_recv_request(unit_id);
+        if (unit.task->flag_keepalive) {
+            unit.server->resetTask(unit.task);
+            start_recv_request(unit_id);
+        } else {
+            do_io_error(unit_id);
+        }
     } else {
         // do send result
         int r = ::z::low::net::tcp_write(unit.task->socket, w, bytes);

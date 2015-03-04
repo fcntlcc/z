@@ -109,6 +109,16 @@ template <typename T, typename LOCK = z::low::multi_thread::ZNoLock>
     };
 
 
+template <typename LOCK = z::low::multi_thread::ZNoLock>
+    class HashTable64 {
+    public:
+        typedef uint64_t HashKey;
+    private:
+        LOCK        _lock;
+        HashKey     *_buckets;
+        uint32_t    _bucket_size;
+    };
+
 // ------------------------------------------------------------------------ //
 
 
