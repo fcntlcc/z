@@ -85,7 +85,10 @@ int sample_http_server_op_read(RPCTask *t) {
             if (p) {
                 h->host = p - h->buf + 6;
                 p = strchr(p + 6, '\r');
-                *p = 0;
+                if (!p) {
+                    return RPC_OP_READ;
+                }
+                *p = '\0';
                 return RPC_OP_SCHED;
             }
         }

@@ -68,5 +68,3 @@ add_subdirectory(tool)
 # DIR: experiment
 add_subdirectory(experiment)
 
-# DIR: router
-add_subdirectory(router)
