@@ -10,3 +10,6 @@ target_link_libraries(demo_internal_echo_server rpc low pthread rt)
 add_executable(demo_http_server http_server.cpp)
 target_link_libraries(demo_http_server rpc low pthread rt)
 
+add_executable(demo_sample_http_service sample_http_service.cpp)
+target_link_libraries(demo_sample_http_service rpc low pthread rt)
+

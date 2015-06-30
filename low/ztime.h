@@ -19,6 +19,12 @@ ztime_t     ztime_now();
 void        ztime_now(ztime_t * t);
 long        ztime_length_us(const ztime_t & begin, const ztime_t & end);
 
+void        zsleep_sec(uint32_t seconds);
+void        zsleep_ms(uint32_t  milliseconds);
+void        zsleep_us(uint32_t  microseconds);
+void        zsleep_ns(uint32_t  nanoseconds);
+
+
 } // namespace time
 } // namespace low
 } // namespace z

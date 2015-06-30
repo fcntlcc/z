@@ -60,7 +60,9 @@ private:
     LOCK         _lock;
 };
 
-template <typename T, typename LOCK = z::low::multi_thread::ZNoLock>
+template <typename T, 
+         typename LOCK = z::low::multi_thread::ZNoLock,
+         int DefaultLength = 1024>
     class FixedLengthQueue {
     private:
         Z_DECLARE_COPY_FUNCTIONS(FixedLengthQueue);
@@ -69,7 +71,7 @@ template <typename T, typename LOCK = z::low::multi_thread::ZNoLock>
             ItemWrapper     *next;
         };
     public:
-        FixedLengthQueue(uint32_t max_length);
+        FixedLengthQueue(uint32_t max_length = DefaultLength);
         ~FixedLengthQueue();
 
         bool enqueue(const T &t);
@@ -86,12 +88,14 @@ template <typename T, typename LOCK = z::low::multi_thread::ZNoLock>
         StaticLinkedList<ItemWrapper> _free_list;
     };
 
-template <typename T, typename LOCK = z::low::multi_thread::ZNoLock>
+template <typename T, 
+         typename LOCK = z::low::multi_thread::ZNoLock,
+         int DefaultLength = 1024>
     class FixedLengthQueueWithFd {
     private:
         Z_DECLARE_COPY_FUNCTIONS(FixedLengthQueueWithFd);
     public:
-        FixedLengthQueueWithFd(uint32_t max_length);
+        FixedLengthQueueWithFd(uint32_t max_length = DefaultLength);
         ~FixedLengthQueueWithFd();
 
         bool enqueue(const T &t);
@@ -228,18 +232,18 @@ void IDPool<LOCK>::release(uint32_t id) {
 
 
 
-template <typename T, typename LOCK>
-    FixedLengthQueue<T, LOCK>::FixedLengthQueue(uint32_t max_length)
+template <typename T, typename LOCK, int L>
+    FixedLengthQueue<T, LOCK, L>::FixedLengthQueue(uint32_t max_length)
     : _head(nullptr), _tail(nullptr), _count(0), _free_list(max_length + 1) {
         _head = _tail = _free_list.allocate();
         _tail->next = nullptr;
     }
 
-template <typename T, typename LOCK>
-    FixedLengthQueue<T, LOCK>::~FixedLengthQueue() {}
+template <typename T, typename LOCK, int L>
+    FixedLengthQueue<T, LOCK, L>::~FixedLengthQueue() {}
 
-template <typename T, typename LOCK>
-    bool FixedLengthQueue<T, LOCK>::enqueue(const T &t) {
+template <typename T, typename LOCK, int L>
+    bool FixedLengthQueue<T, LOCK, L>::enqueue(const T &t) {
         _lock.lock();
         ItemWrapper * new_item = _free_list.allocate();
         if (new_item) {
@@ -258,8 +262,8 @@ template <typename T, typename LOCK>
         }
     }
 
-template <typename T, typename LOCK>
-    bool FixedLengthQueue<T, LOCK>::dequeue(T *t) {
+template <typename T, typename LOCK, int L>
+    bool FixedLengthQueue<T, LOCK, L>::dequeue(T *t) {
         Z_RET_IF_ANY_ZERO_1(t, false);
         _lock.lock();
         if (_head->next) {
@@ -279,36 +283,36 @@ template <typename T, typename LOCK>
         }
     }
 
-template <typename T, typename LOCK>
-    uint32_t FixedLengthQueue<T, LOCK>::count() const {
+template <typename T, typename LOCK, int L>
+    uint32_t FixedLengthQueue<T, LOCK, L>::count() const {
         return _count;
     }
 
-template <typename T, typename LOCK>
-    bool FixedLengthQueue<T, LOCK>::isFull() const {
+template <typename T, typename LOCK, int L>
+    bool FixedLengthQueue<T, LOCK, L>::isFull() const {
         return _free_list.isEmpty();
     }
 
-template <typename T, typename LOCK>
-    bool FixedLengthQueue<T, LOCK>::isEmpty() const {
+template <typename T, typename LOCK, int L>
+    bool FixedLengthQueue<T, LOCK, L>::isEmpty() const {
         return (count() == 0);
     }
 
-template <typename T, typename LOCK>
-    FixedLengthQueueWithFd<T, LOCK>::FixedLengthQueueWithFd(uint32_t max_length)
+template <typename T, typename LOCK, int L>
+    FixedLengthQueueWithFd<T, LOCK, L>::FixedLengthQueueWithFd(uint32_t max_length)
     : _queue(max_length) {
         int ret = ::pipe2(_fds, O_CLOEXEC | O_NONBLOCK);
         ZASSERT(0 == ret);
     }
 
-template <typename T, typename LOCK>
-    FixedLengthQueueWithFd<T, LOCK>::~FixedLengthQueueWithFd() {
+template <typename T, typename LOCK, int L>
+    FixedLengthQueueWithFd<T, LOCK, L>::~FixedLengthQueueWithFd() {
         ::close(_fds[0]);
         ::close(_fds[1]);
     }
 
-template <typename T, typename LOCK>
-    bool FixedLengthQueueWithFd<T, LOCK>::enqueue(const T &t) {
+template <typename T, typename LOCK, int L>
+    bool FixedLengthQueueWithFd<T, LOCK, L>::enqueue(const T &t) {
         if (_queue.enqueue(t) ) {
             for (;;) {
                 int ret = ::write(enqueue_fd(), "\1", 1);
@@ -328,8 +332,8 @@ template <typename T, typename LOCK>
         return false;
     }
 
-template <typename T, typename LOCK>
-    bool FixedLengthQueueWithFd<T, LOCK>::dequeue(T *t) {
+template <typename T, typename LOCK, int L>
+    bool FixedLengthQueueWithFd<T, LOCK, L>::dequeue(T *t) {
         char buf = 0;
         for (;;) {
             int ret = ::read(dequeue_fd(), &buf, 1);

@@ -1,5 +1,7 @@
 #include "./ztime.h"
 #include <stdio.h>
+#include <sys/select.h>
+#include <sys/time.h>
 
 namespace z {
 namespace low {
@@ -60,6 +62,43 @@ long ztime_length_us(const ztime_t & begin, const ztime_t & end)
     return (end.tv_sec - begin.tv_sec) * 1000L * 1000L
          + (end.tv_nsec - begin.tv_nsec) / 1000L;
 }
+
+void zsleep_sec(uint32_t seconds) {
+    timeval tm = {seconds, 0};
+    select(0, NULL, NULL, NULL, &tm);
+}
+
+void zsleep_ms(uint32_t milliseconds) {
+    timeval tm = {0, milliseconds * 1000};
+    if (milliseconds >= 1000) {
+        tm.tv_sec   = milliseconds / 1000;
+        tm.tv_usec  = (milliseconds % 1000) * 1000;
+    }
+    select(0, NULL, NULL, NULL, &tm);
+}
+
+void zsleep_us(uint32_t microseconds) {
+    const long US_PER_SEC = 1000L * 1000L;
+    
+    timeval tm = {0, microseconds};
+    if (microseconds >= US_PER_SEC) {
+        tm.tv_sec   = microseconds / US_PER_SEC;
+        tm.tv_usec  = microseconds % US_PER_SEC;
+    }
+    select(0, NULL, NULL, NULL, &tm);
+}
+
+void zsleep_ns(uint32_t nanoseconds) {
+    const long NS_PER_SEC = 1000L * 1000L * 1000L;
+
+    timespec ts = {0, nanoseconds};
+    if (nanoseconds > NS_PER_SEC) {
+        ts.tv_sec   = nanoseconds / NS_PER_SEC;
+        ts.tv_nsec  = nanoseconds % NS_PER_SEC;
+    }
+    pselect(0, NULL, NULL, NULL, &ts, NULL);
+}
+
 
 } // namespace time
 } // namespace low
