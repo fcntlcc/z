@@ -140,15 +140,12 @@ template <typename T, typename LOCK>
     T *StaticLinkedList<T, LOCK>::allocate() {
         Z_RET_IF_ANY_ZERO_2(_item_pool, _item_pool[0].next_ptr, nullptr);
         _lock.lock();
+        Z_RET_IF_ANY_ZERO_2(_item_pool, _item_pool[0].next_ptr, nullptr);
         ItemWrapper *free_item = &_item_pool[_item_pool[0].next_ptr];
         _item_pool[0].next_ptr = free_item->next_ptr;
         _lock.unlock();
-        if (free_item == &_item_pool[0]) {
-            return nullptr;
-        } else {
-            free_item->next_ptr = 0;
-            return &free_item->item;
-        }
+        free_item->next_ptr = 0;
+        return &free_item->item;
     }
 
 template <typename T, typename LOCK>

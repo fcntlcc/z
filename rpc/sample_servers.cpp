@@ -164,9 +164,9 @@ RPCServiceHandle * create_sample_http_service(int listen_fd, int thread_num) {
     s->epoll_fd         = -1;
     memset(s->service_op, 0, sizeof(s->service_op) );
     s->link_count       = 0;
-    s->link_max         = 1024;
+    s->link_max         = 102400;
     s->calc_thread      = thread_num;
-    s->task_queue_size  = 1024;
+    s->task_queue_size  = 102400;
         
     s->task_pool        = NULL;
     s->task_queue       = NULL;

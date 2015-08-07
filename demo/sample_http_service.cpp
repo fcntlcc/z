@@ -30,7 +30,7 @@ bool parse_params(Params &pa, char* argv[]) {
 }
 
 void run(Params &pa) {
-    int socket = z::low::net::tcp_listen(pa.port.c_str(), 1024, false/*async*/);
+    int socket = z::low::net::tcp_listen(pa.port.c_str(), 8192, false/*async*/);
     z::rpc::server::RPCServiceHandle *s = z::rpc::sample::http::create_sample_http_service(socket, pa.thread_num);
 
     ZLOG(LOG_INFO, "service begin.");

@@ -9,6 +9,7 @@
 #include "./zmem.h"
 #include "./multi_thread.h"
 #include "./ds.h"
+#include "./tcp_client.h"
 
 namespace z {
 ;

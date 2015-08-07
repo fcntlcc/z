@@ -233,7 +233,7 @@ static void rpc_init_service(RPCServiceHandle *service, int epoll) {
     if (service->task_pool) {
         ZLOG(LOG_WARN, "task_pool is not NULL, ignore. create a new one.");
     }
-    service->task_pool = new RPCServiceHandle::task_pool_t(1 + service->link_max);
+    service->task_pool = new RPCServiceHandle::task_pool_t(1 + service->link_max); // plus the listen task
 
     if (service->task_queue) {
         ZLOG(LOG_WARN, "task_queue is not NULL, ignore. create new queues.");
@@ -308,6 +308,7 @@ static RPCTask* rpc_build_task(RPCServiceHandle *service, int fd, int fd_type) {
     t->dn           = 0;
     t->dptr         = 0;
 
+    ++service->link_count;
     return t;
 }
 
@@ -328,6 +329,7 @@ static void rpc_destroy_task(RPCServiceHandle *service, RPCTask *task) {
     task->dptr = 0;
 
     service->task_pool->release(task);
+    --service->link_count;
 }
 
 static int rpc_poll_task(RPCServiceHandle *service, RPCTask *task, int events) {
@@ -388,12 +390,12 @@ static void rpc_listen_event(int /*epoll*/, epoll_event &ev) {
             RPCServiceHandle *s = t->service;
             RPCTask *new_task = rpc_build_task(s, fd, RPC_EL_FD_IO);
             if (NULL == new_task) {
-                ZLOG(LOG_WARN, "Build task for I/O fd failed. [link: %u] [max: %u]",
-                    s->link_count, s->link_max);
+                ZLOG(LOG_WARN, "Fail to build task for I/O fd. [link: %u] [max: %u]",
+                    s->link_count - 1, s->link_max);
                 close(fd);
-                }
-
-            rpc_do_op_rec(new_task->op_next, new_task);
+            } else {
+                rpc_do_op_rec(new_task->op_next, new_task);
+            }
         } else {
             ZLOG(LOG_WARN, "Accept return %d: errno = %d(%s)", fd, errno, ZSTRERR(errno).c_str() );
         }
