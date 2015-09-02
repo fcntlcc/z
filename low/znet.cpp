@@ -28,6 +28,26 @@ void tcp_socket_set_sync(socket_fd_t s) {
     fcntl(s, F_SETFL, flags);
 }
 
+void tcp_socket_set_timeout(socket_fd_t fd, int read_timeout_ms, int write_timeout_ms) {
+    if (read_timeout_ms >= 0) {
+        struct timeval read_timeout = {read_timeout_ms / 1000, (read_timeout_ms % 1000) * 1000};
+        setsockopt(fd, 
+                   SOL_SOCKET, 
+                   SO_RCVTIMEO, 
+                   &read_timeout, 
+                   sizeof(read_timeout) );
+    }
+
+    if (write_timeout_ms >= 0) {
+        struct timeval write_timeout = {write_timeout_ms / 1000, (write_timeout_ms % 1000) * 1000};
+        setsockopt(fd, 
+                   SOL_SOCKET, 
+                   SO_SNDTIMEO, 
+                   &write_timeout, 
+                   sizeof(write_timeout) );
+    }
+}
+
 socket_fd_t tcp_create_socket_to(const char *node, short int port, bool async) {
     char port_str[64];
     snprintf(port_str, sizeof(port_str), "%hd", port);
@@ -57,7 +77,7 @@ socket_fd_t tcp_create_socket_to(const char *node, const char *service, bool asy
                 res->ai_protocol);
 
     r = ::connect(s, res->ai_addr, res->ai_addrlen);
-    if (r == -1 && !(errno = EINPROGRESS || errno == EINTR) ) {
+    if (r == -1 && !(errno == EINPROGRESS || errno == EINTR) ) {
         close(s);
         s = NullSocket;
     }
@@ -65,6 +85,48 @@ socket_fd_t tcp_create_socket_to(const char *node, const char *service, bool asy
     ::freeaddrinfo(res);
 
     return s;
+}
+
+socket_fd_t tcp_create_socket_timeout(const char *host, short int port, int timeout_ms) {
+    char port_str[64];
+    snprintf(port_str, sizeof(port_str), "%hd", port);
+
+    return tcp_create_socket_timeout(host, port_str, timeout_ms);
+}
+
+socket_fd_t tcp_create_socket_timeout(const char *node, const char *service, int timeout_ms) {
+    if (timeout_ms <= 0) {
+        return tcp_create_socket_to(node, service, /*async*/ false);
+    } else {
+        socket_fd_t fd = tcp_create_socket_to(node, service, /*async*/ true);
+        if (fd == -1) {
+            return fd;
+        }
+
+        while (1) {
+            fd_set fset;
+            FD_ZERO(&fset);
+            FD_SET(fd, &fset);
+            struct timeval tm = {timeout_ms / 1000, (timeout_ms % 1000) * 1000};
+            int ret = select(fd + 1, NULL, &fset, NULL, &tm);
+            FD_ZERO(&fset);
+            if (ret > 0) {
+                // connected.
+                tcp_socket_set_sync(fd);
+                return fd;
+            } else if (0 == ret) {
+                // timeout
+                ::close(fd);
+                return -1;
+            } else {
+                if (errno != EINTR) {
+                    // error
+                    ::close(fd);
+                    return -1;
+                }
+            }
+        }
+    }
 }
 
 socket_fd_t tcp_listen(short int port, int backlog, bool async) {

@@ -19,9 +19,15 @@ struct network_peer_t {
 void tcp_socket_set_async(socket_fd_t s);
 void tcp_socket_set_sync(socket_fd_t s);
 
+void tcp_socket_set_timeout(socket_fd_t fd, int read_timout_ms, int write_timeout_ms);
+
 socket_fd_t tcp_create_socket_to(const char *host, short int port, bool async = false);
 
 socket_fd_t tcp_create_socket_to(const char *node, const char *service, bool async = false);
+
+socket_fd_t tcp_create_socket_timeout(const char *host, short int port, int timeout_ms = 0);
+
+socket_fd_t tcp_create_socket_timeout(const char *node, const char *service, int timeout_ms = 0);
 
 socket_fd_t tcp_listen(short int port, int backlog = 1024, bool async = false);
 
