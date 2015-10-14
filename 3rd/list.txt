@@ -1,5 +1,0 @@
-
-* rapidjson:
-    headers: include/rapidjson
-    license: rapidjson_license.txt
-
